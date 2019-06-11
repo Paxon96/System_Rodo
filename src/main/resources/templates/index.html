@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+    <title>RODO</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <script src="../static/js/bootstrap.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand"></a> <img src="../images/icon.png" width="64" height="64" th:src="@{images/icon.png}"/>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+</nav>
+<div class="container" style="margin-top: 40px">
+    <div class="alert alert-danger" role="alert" th:if="${errorMsg}">
+        Podanego użytkownika nie ma w systemie.
+    </div>
+    <h1 style="margin-bottom: 20px">Podaj numer indeksu lub identyfikator</h1>
+    <form th:action="@{/}" th:object="${user}" method="post">
+        <div class="form-group">
+            <input type="text" class="form-control" th:field="*{id}"
+                   placeholder="Identyfikator użytkownika">
+        </div>
+        <div class="form-group">
+            <button type="submit" class="btn btn-outline-dark">Zaloguj</button>
+        </div>
+    </form>
+</div>
+</body>
+</html>
