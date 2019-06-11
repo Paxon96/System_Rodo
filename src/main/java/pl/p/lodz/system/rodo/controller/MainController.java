@@ -5,11 +5,14 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import pl.p.lodz.system.rodo.entity.User;
 
 import javax.validation.Valid;
+import java.io.IOException;
 import java.util.Map;
 
 @Controller
@@ -76,12 +79,25 @@ public class MainController {
     }
 
     @RequestMapping(value = "teacherSettings", method = RequestMethod.GET)
-    public String getTeacherSettings(Model model){
+    public String getTeacherSettings(Model model) {
         return "teacherSettings";
     }
 
     @RequestMapping(value = "studentSettings", method = RequestMethod.GET)
-    public String getStudentSettings(Model model){
+    public String getStudentSettings(Model model) {
         return "studentSettings";
+    }
+
+    @RequestMapping(value = "/upload", method = RequestMethod.POST)
+    public ModelAndView gerFile(@RequestParam("file") MultipartFile file, ModelAndView model) {
+        System.out.println(file);
+        try {
+            System.out.println(new String(file.getBytes(), "UTF-8"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        model.setViewName("redirect:fileUpload");
+        return model;
     }
 }
