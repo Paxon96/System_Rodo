@@ -14,6 +14,7 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.*;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -26,17 +27,16 @@ import javax.sql.DataSource;
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-//    @Autowired
-//    DataSource dataSource;
-//
-//    @Autowired
-//    public void configAuthentication(AuthenticationManagerBuilder auth) throws Exception {
-//        auth.jdbcAuthentication()
-//            .dataSource(dataSource)
-//            .usersByUsernameQuery("select login as principal, pass as credentials, true from pracownik_login where login = ?")
-//            .authoritiesByUsernameQuery("select pracownik_login.login as principal, pracownicy.permission as role from pracownik_login join pracownicy on pracownik_login.id_pracownika=pracownicy.id where login=?");
-//
-//    }
+    @Autowired
+    DataSource dataSource;
+
+    @Autowired
+    public void configAuthentication(AuthenticationManagerBuilder auth) throws Exception {
+        auth.jdbcAuthentication()
+            .dataSource(dataSource)
+            .usersByUsernameQuery("select login as principal, pass as credentials, true from user where login=?").passwordEncoder(dPasswordEncoder())
+            .authoritiesByUsernameQuery("select user.login as principal, user.permission as role from user where login=?");
+    }
 
 
 
@@ -44,8 +44,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                .antMatchers("/**").permitAll();
-//                .antMatchers("/produkty/dodaj").access("hasRole('ROLE_MOD') or hasRole('ROLE_ADMIN')")
+                .antMatchers("/**").permitAll()
+                .and()
+                .formLogin()
+                .loginPage("/")
+                .defaultSuccessUrl("/marks",true)
+                .permitAll();
+////                .antMatchers("/produkty/dodaj").access("hasRole('ROLE_MOD') or hasRole('ROLE_ADMIN')")
 //                .antMatchers("/klienci/dodaj").access("hasRole('ROLE_MOD') or hasRole('ROLE_ADMIN')or hasRole('ROLE_ADVANCED')")
 //                .antMatchers("/kategorie/dodaj").access("hasRole('ROLE_MOD') or hasRole('ROLE_ADMIN')or hasRole('ROLE_ADVANCED')")
 //                .antMatchers("/dostawcy/dodaj").access("hasRole('ROLE_MOD') or hasRole('ROLE_ADMIN')")
@@ -87,13 +92,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 //    //        return manager;
 //    //    }
 //
-//    @Bean
-//    public JdbcUserDetailsManager jdbcUserDetailsManager() throws Exception {
-//        JdbcUserDetailsManager jdbcUserDetailsManager = new JdbcUserDetailsManager();
-//        jdbcUserDetailsManager.setDataSource(dataSource);
-//        return jdbcUserDetailsManager;
-//    }
-//
+    @Bean
+    public JdbcUserDetailsManager jdbcUserDetailsManager() throws Exception {
+        JdbcUserDetailsManager jdbcUserDetailsManager = new JdbcUserDetailsManager();
+        jdbcUserDetailsManager.setDataSource(dataSource);
+        return jdbcUserDetailsManager;
+    }
+
     @Bean
     public AuthenticationSuccessHandler successHandler() {
         SimpleUrlAuthenticationSuccessHandler handler = new SimpleUrlAuthenticationSuccessHandler();
@@ -108,12 +113,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 //
 //    //    @Bean
 //    //    public JdbcUserDetailsManager jdbcUserDetailsManager() {
-//    //        final Properties users = new Properties();
-//    //        return new JdbcUserDetailsManager(users);
+//    //        final Properties user = new Properties();
+//    //        return new JdbcUserDetailsManager(user);
 //    //    }
 //
-//    @Bean
-//    public PasswordEncoder passwordEncoder() {
-//        return new BCryptPasswordEncoder();
-//    }
+    @Bean
+    public PasswordEncoder dPasswordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 }

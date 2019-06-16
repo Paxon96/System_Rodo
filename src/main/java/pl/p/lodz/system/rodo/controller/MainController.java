@@ -1,5 +1,7 @@
 package pl.p.lodz.system.rodo.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -10,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import pl.p.lodz.system.rodo.entity.User;
+import pl.p.lodz.system.rodo.repo.UserRepository;
 
 import javax.validation.Valid;
 import java.io.IOException;
@@ -18,32 +21,41 @@ import java.util.Map;
 @Controller
 public class MainController {
 
+    @Autowired
+    private UserRepository userRepository;
+
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String getMainPage(Model model) {
+        System.out.println(userRepository.findFirstByLogin("temp1"));
         model.addAttribute("user", new User());
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        String encodedPassword = passwordEncoder.encode("test");
+        System.out.println(encodedPassword);
         return "index";
     }
 
     @RequestMapping(value = "/", method = RequestMethod.POST)
-    public ModelAndView postMainPage(@ModelAttribute("user") @Valid User user, RedirectAttributes redirect, ModelAndView model) {
+    public String postMainPage(/*@ModelAttribute("user") @Valid User user, RedirectAttributes redirect, ModelAndView model*/) {
 
-        if (user.getId().equalsIgnoreCase("a")) {
-            model.setViewName("redirect:/");
-            redirect.addFlashAttribute("errorMsg", "temp");
-            redirect.addFlashAttribute("user", user);
-            return model;
-        }
+//        if (user.getLogin().equalsIgnoreCase("a")) {
+//            model.setViewName("redirect:/");
+//            redirect.addFlashAttribute("errorMsg", "temp");
+//            redirect.addFlashAttribute("user", user);
+//            return model;
+//        }
+//
+//        model.setViewName("redirect:password");
+//        redirect.addFlashAttribute("user", user);
 
-        model.setViewName("redirect:password");
-        redirect.addFlashAttribute("user", user);
-
-        return model;
+        return "index";
     }
 
     @RequestMapping(value = "/password", method = RequestMethod.GET)
     public String getPasswordPage(Model model) {
         Map<String, Object> modelMap = model.asMap();
-        model.addAttribute("user", modelMap.get("user"));
+        User user = (User) modelMap.get("user");
+        System.out.println(user);
+        model.addAttribute("user", user);
         return "passwordPage";
     }
 
@@ -55,7 +67,7 @@ public class MainController {
             redirect.addFlashAttribute("user", user);
             return model;
         }
-        if (user.getId().equalsIgnoreCase("N")) {
+        if (user.getLogin().equalsIgnoreCase("N")) {
             model.setViewName("redirect:fileUpload");
             redirect.addFlashAttribute("user", user);
             return model;
