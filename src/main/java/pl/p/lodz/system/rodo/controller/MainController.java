@@ -1,13 +1,13 @@
 package pl.p.lodz.system.rodo.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -16,6 +16,8 @@ import pl.p.lodz.system.rodo.repo.UserRepository;
 
 import javax.validation.Valid;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -31,23 +33,29 @@ public class MainController {
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         String encodedPassword = passwordEncoder.encode("test");
         System.out.println(encodedPassword);
+
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        auth.getAuthorities();
+        String name = auth.getName();
+        System.out.println(name);
         return "index";
     }
 
     @RequestMapping(value = "/", method = RequestMethod.POST)
-    public String postMainPage(/*@ModelAttribute("user") @Valid User user, RedirectAttributes redirect, ModelAndView model*/) {
+    public ModelAndView postMainPage(@ModelAttribute("user") @Valid User user, RedirectAttributes redirect, ModelAndView model) {
 
-//        if (user.getLogin().equalsIgnoreCase("a")) {
-//            model.setViewName("redirect:/");
-//            redirect.addFlashAttribute("errorMsg", "temp");
-//            redirect.addFlashAttribute("user", user);
-//            return model;
-//        }
-//
-//        model.setViewName("redirect:password");
-//        redirect.addFlashAttribute("user", user);
+        if (user.getLogin().equalsIgnoreCase("a")) {
+            model.setViewName("redirect:/");
+            redirect.addFlashAttribute("errorMsg", "temp");
+            redirect.addFlashAttribute("user", user);
+            return model;
+        }
 
-        return "index";
+        model.setViewName("redirect:password");
+        redirect.addFlashAttribute("user", user);
+
+        return model;
     }
 
     @RequestMapping(value = "/password", method = RequestMethod.GET)
@@ -80,6 +88,9 @@ public class MainController {
 
     @RequestMapping(value = "marks", method = RequestMethod.GET)
     public String getStudentMarks(Model model) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String name = auth.getName();
+        System.out.println(name);
         System.out.println(model);
         return "studentMarks";
     }
@@ -90,13 +101,16 @@ public class MainController {
         return "teacherFileUpload";
     }
 
-    @RequestMapping(value = "teacherSettings", method = RequestMethod.GET)
+    @RequestMapping(value = "settings", method = RequestMethod.GET)
     public String getTeacherSettings(Model model) {
-        return "teacherSettings";
-    }
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-    @RequestMapping(value = "studentSettings", method = RequestMethod.GET)
-    public String getStudentSettings(Model model) {
+        Collection<? extends GrantedAuthority> authorityList = auth.getAuthorities();
+        for (GrantedAuthority grantedAuthority : authorityList) {
+            if(grantedAuthority.getAuthority().equalsIgnoreCase("ADMIN"))
+                return "teacherSettings";
+        }
+
         return "studentSettings";
     }
 
@@ -111,5 +125,13 @@ public class MainController {
 
         model.setViewName("redirect:fileUpload");
         return model;
+    }
+
+    @PostMapping("/logout")
+    public String logout() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String name = auth.getName();
+        System.out.println(name);
+        return "index";
     }
 }

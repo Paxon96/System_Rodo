@@ -44,26 +44,19 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                .antMatchers("/**").permitAll()
+                .antMatchers("/", "/password").permitAll()
+                .antMatchers("/marks").access("hasRole('ROLE_USER')")
+                .antMatchers("/fileUpload").access("hasRole('ROLE_ADMIN')")
                 .and()
                 .formLogin()
-                .loginPage("/")
-                .defaultSuccessUrl("/marks",true)
+                .loginPage("/password")
+                .defaultSuccessUrl("/settings",true)
+                .permitAll()
+                .and()
+                .logout()
+                .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+                .logoutSuccessUrl("/")
                 .permitAll();
-////                .antMatchers("/produkty/dodaj").access("hasRole('ROLE_MOD') or hasRole('ROLE_ADMIN')")
-//                .antMatchers("/klienci/dodaj").access("hasRole('ROLE_MOD') or hasRole('ROLE_ADMIN')or hasRole('ROLE_ADVANCED')")
-//                .antMatchers("/kategorie/dodaj").access("hasRole('ROLE_MOD') or hasRole('ROLE_ADMIN')or hasRole('ROLE_ADVANCED')")
-//                .antMatchers("/dostawcy/dodaj").access("hasRole('ROLE_MOD') or hasRole('ROLE_ADMIN')")
-//                .antMatchers("/dostawy/**").access("hasRole('ROLE_MOD') or hasRole('ROLE_ADMIN')or hasRole('ROLE_ADVANCED')")
-//                .antMatchers("/administrator","/register","/pracownicy").access("hasRole('ROLE_ADMIN')")
-//                .anyRequest().authenticated()
-//                .and()
-//                .logout()
-//                .logoutRequestMatcher(new AntPathRequestMatcher("/index"))
-//                .logoutSuccessUrl("/")
-//                .permitAll();
-//                .and()
-//                .exceptionHandling().accessDeniedPage("/error/brakdostepu");
     }
 
 
