@@ -1,5 +1,6 @@
 package pl.p.lodz.system.rodo.controller;
 
+import net.bytebuddy.asm.Advice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -11,11 +12,15 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import pl.p.lodz.system.rodo.entity.Mark;
 import pl.p.lodz.system.rodo.entity.User;
+import pl.p.lodz.system.rodo.repo.MarkRepository;
 import pl.p.lodz.system.rodo.repo.UserRepository;
 
 import javax.validation.Valid;
 import java.io.IOException;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +30,9 @@ public class MainController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private MarkRepository markRepository;
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String getMainPage(Model model) {
@@ -89,9 +97,7 @@ public class MainController {
     @RequestMapping(value = "marks", method = RequestMethod.GET)
     public String getStudentMarks(Model model) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String name = auth.getName();
-        System.out.println(name);
-        System.out.println(model);
+        model.addAttribute("marks", markRepository.findFirstByUser(userRepository.findFirstByLogin(auth.getName())));
         return "studentMarks";
     }
 

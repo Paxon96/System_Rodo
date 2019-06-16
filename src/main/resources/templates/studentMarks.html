@@ -43,12 +43,12 @@
                 <th></th>
             </tr>
             <tbody>
-            <tr th:each="word, rowStat: ${wordsList}"
+            <tr th:each="mark, rowStat: ${marks}"
                 th:style="${rowStat.odd} ? 'color: black' : 'color: black;'">
-                <td text=""></td>
-                <td text=""></td>
-                <td text=""></td>
-				<td text=""></td>
+                <td th:text="${mark.id}"></td>
+                <td th:text="${mark.mark}"></td>
+                <td th:text="${mark.points}"></td>
+				<td th:text="${mark.evalDate}"></td>
                 <td>
                     <div>
                         <form action="" >
