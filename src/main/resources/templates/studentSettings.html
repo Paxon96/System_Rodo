@@ -32,10 +32,10 @@
 </nav>
 <div class="container" style="margin-top: 40px">
     <h1 style="margin-bottom: 20px">Ustawienia</h1>
-        <form action="" object="">
+        <form th:action="@{/settings/student}" th:method="post">
             <div class="form-group">
                 <label>Hasło</label>
-                <input type="text" class="form-control" placeholder="Hasło">
+                <input type="text" class="form-control" placeholder="Hasło" name="newPassword">
             </div>
             <button type="submit" class="btn btn-outline-dark">Zapisz</button>
         </form>

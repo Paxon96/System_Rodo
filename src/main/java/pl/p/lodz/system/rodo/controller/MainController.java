@@ -16,6 +16,7 @@ import pl.p.lodz.system.rodo.entity.User;
 import pl.p.lodz.system.rodo.repo.MarkRepository;
 import pl.p.lodz.system.rodo.repo.UserRepository;
 import pl.p.lodz.system.rodo.service.MarkService;
+import pl.p.lodz.system.rodo.service.UserService;
 
 import javax.validation.Valid;
 import java.io.IOException;
@@ -32,6 +33,8 @@ public class MainController {
     private MarkRepository markRepository;
     @Autowired
     private MarkService markService;
+    @Autowired
+    private UserService userService;
 
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
@@ -140,6 +143,16 @@ public class MainController {
         }
 
         return "studentSettings";
+    }
+
+    @RequestMapping(value = "settings/student", method = RequestMethod.POST)
+    public ModelAndView setStudentSettings(@RequestParam("newPassword") String newPassword, ModelAndView model){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        userService.changeStudentPassword(newPassword, auth);
+
+        model.setViewName("redirect:/settings");
+        return model;
     }
 
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
