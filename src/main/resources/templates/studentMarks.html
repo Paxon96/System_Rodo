@@ -51,9 +51,9 @@
 				<td th:text="${mark.evalDate}"></td>
                 <td>
                     <div>
-                        <form action="" >
-                            <button type="submit" class="btn btn-outline-dark"
-                                    value="">Usuń ocenę
+                        <form th:action="@{/marks/delete}" th:method="post" >
+                            <button type="submit" class="btn btn-outline-dark" id="marksToDelete" name="markId"
+                                    th:value="${mark.id}" value="">Usuń ocenę
                             </button>
                         </form>
                     </div>
