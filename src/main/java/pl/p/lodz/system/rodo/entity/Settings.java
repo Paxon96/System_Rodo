@@ -1,12 +1,18 @@
 package pl.p.lodz.system.rodo.entity;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
 @Entity
 @Data
 @Table(name = "Settings")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Settings {
 
     @Id
@@ -20,4 +26,9 @@ public class Settings {
     @ManyToOne(cascade = {CascadeType.ALL})
     @JoinColumn(name = "UserID")
     private User user;
+
+    @Override
+    public String toString() {
+        return "Settings{" + "id=" + id + ", daysToDelete=" + daysToDelete + ", user=" + user.getId() + '}';
+    }
 }
