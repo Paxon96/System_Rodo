@@ -1,28 +1,26 @@
 package pl.p.lodz.system.rodo.controller;
 
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import pl.p.lodz.system.rodo.entity.Mark;
 import pl.p.lodz.system.rodo.entity.User;
 import pl.p.lodz.system.rodo.repo.MarkRepository;
-import pl.p.lodz.system.rodo.repo.SettingsRepository;
 import pl.p.lodz.system.rodo.repo.UserRepository;
-import pl.p.lodz.system.rodo.service.EmailService;
 import pl.p.lodz.system.rodo.service.MarkService;
 import pl.p.lodz.system.rodo.service.UserService;
 
 import javax.validation.Valid;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Map;
 
@@ -35,6 +33,8 @@ public class MainController {
     private MarkService markService;
     @Autowired
     private UserService userService;
+    @Autowired
+    private MarkRepository markRepository;
 
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
@@ -42,18 +42,18 @@ public class MainController {
         model.addAttribute("user", new User());
         //        userRepository.save(User.builder().login("t2").password(passwordEncoder.encode("t2")).permission("ROLE_USER").build());
         //
-        //        markRepository.save(Mark.builder()
-        //                                .points(12.5)
-        //                                .evalDate(new Timestamp(System.currentTimeMillis()))
-        //                                .mark(4)
-        //                                .user(userRepository.findFirstByLogin("t3"))
-        //                                .build());
-        //        markRepository.save(Mark.builder()
-        //                                .points(12)
-        //                                .evalDate(new Timestamp(System.currentTimeMillis()))
-        //                                .mark(5)
-        //                                .user(userRepository.findFirstByLogin("t3"))
-        //                                .build());
+//                markRepository.save(Mark.builder()
+//                                        .points(12.5)
+//                                        .evalDate(new Timestamp(System.currentTimeMillis()))
+//                                        .mark(4)
+//                                        .user(userRepository.findFirstByLogin("t3"))
+//                                        .build());
+//                markRepository.save(Mark.builder()
+//                                        .points(12)
+//                                        .evalDate(new Timestamp(System.currentTimeMillis()))
+//                                        .mark(5)
+//                                        .user(userRepository.findFirstByLogin("t3"))
+//                                        .build());
         //        Settings settings = Settings.builder().daysToDelete((short) 5).user(userRepository.findFirstByLogin("t2")).build();
         //        settingsRepository.save(settings);
         return "index";
@@ -99,7 +99,7 @@ public class MainController {
     @RequestMapping(value = "marks/delete", method = RequestMethod.POST)
     public ModelAndView deleteMarkByStudent(@RequestParam("markId") int markId, ModelAndView model) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        markService.deleteMark(markId, auth);
+        markService.deleteMarkByUser(markId, auth);
 
         model.setViewName("redirect:/marks");
         return model;
