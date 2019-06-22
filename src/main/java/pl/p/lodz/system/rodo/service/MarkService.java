@@ -15,7 +15,7 @@ public class MarkService {
     @Autowired
     private MarkRepository markRepository;
 
-    public void deleteMark(int markId, Authentication auth) {
+    public void deleteMarkByUser(int markId, Authentication auth) {
         User user = userRepository.findFirstByLogin(auth.getName());
         user.getMarks().remove(markRepository.findMarkById(markId));
         userRepository.save(user);
