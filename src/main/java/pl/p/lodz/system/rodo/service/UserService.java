@@ -1,20 +1,18 @@
 package pl.p.lodz.system.rodo.service;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 import pl.p.lodz.system.rodo.entity.User;
 import pl.p.lodz.system.rodo.repo.UserRepository;
-
-import java.util.List;
 
 @Service
 public class UserService {
 
     @Autowired private UserRepository userRepository;
+    @Autowired private EmailService emailService;
 
     public void changeUserPassword(String newPassword, Authentication auth) {
         User user = userRepository.findFirstByLogin(auth.getName());
@@ -35,5 +33,12 @@ public class UserService {
             user.getSettings().get(0).setDaysToDelete(Short.parseShort(newDays));
         }
         userRepository.save(user);
+    }
+
+    public void sendEmailToNewUser(User user) {
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        String random = RandomStringUtils.random(8, true, true);
+        userRepository.save(User.builder().login(user.getLogin()).password(passwordEncoder.encode(random)).permission("ROLE_USER").build());
+        emailService.sendEmail(user.getLogin(), random);
     }
 }

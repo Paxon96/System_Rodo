@@ -1,10 +1,12 @@
 package pl.p.lodz.system.rodo.controller;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +17,7 @@ import pl.p.lodz.system.rodo.entity.User;
 import pl.p.lodz.system.rodo.repo.MarkRepository;
 import pl.p.lodz.system.rodo.repo.SettingsRepository;
 import pl.p.lodz.system.rodo.repo.UserRepository;
+import pl.p.lodz.system.rodo.service.EmailService;
 import pl.p.lodz.system.rodo.service.MarkService;
 import pl.p.lodz.system.rodo.service.UserService;
 
@@ -26,11 +29,13 @@ import java.util.Map;
 @Controller
 public class MainController {
 
-    @Autowired private UserRepository userRepository;
-    @Autowired private MarkRepository markRepository;
-    @Autowired private SettingsRepository settingsRepository;
-    @Autowired private MarkService markService;
-    @Autowired private UserService userService;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private MarkService markService;
+    @Autowired
+    private UserService userService;
+
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String getMainPage(Model model) {
@@ -59,8 +64,9 @@ public class MainController {
 
         if (!userService.findLoginInDatabase(user.getLogin())) {
             model.setViewName("redirect:/");
-            redirect.addFlashAttribute("noUserInSystem", "temp");
             redirect.addFlashAttribute("user", user);
+            //TODO Odkomentować wysyłanie maili. NA razie zablokowane żeby nei spamowało xd. Wysyła na adresy politechniczne
+//            userService.sendEmailToNewUser(user);
             return model;
         }
 
@@ -74,7 +80,6 @@ public class MainController {
     public String getPasswordPage(Model model) {
         Map<String, Object> modelMap = model.asMap();
         User user = (User) modelMap.get("user");
-        System.out.println(user);
         model.addAttribute("user", user);
         return "passwordPage";
     }
@@ -136,7 +141,6 @@ public class MainController {
 
         return model;
     }
-
 
     @RequestMapping(value = "settings/student", method = RequestMethod.POST)
     public ModelAndView setStudentSettings(@RequestParam("newPassword") String newPassword, ModelAndView model) {
