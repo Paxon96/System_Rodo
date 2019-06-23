@@ -19,18 +19,11 @@ import pl.p.lodz.system.rodo.entity.User;
 import pl.p.lodz.system.rodo.repo.MarkRepository;
 import pl.p.lodz.system.rodo.repo.UserRepository;
 import pl.p.lodz.system.rodo.service.MarkService;
+import pl.p.lodz.system.rodo.service.SpreadsheetService;
 import pl.p.lodz.system.rodo.service.UserService;
 
 import javax.validation.Valid;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.sql.Timestamp;
-import java.text.NumberFormat;
-import java.text.ParseException;
 import java.util.Collection;
-import java.util.Iterator;
-import java.util.Locale;
 import java.util.Map;
 
 @Controller
@@ -44,6 +37,8 @@ public class MainController {
     private UserService userService;
     @Autowired
     private MarkRepository markRepository;
+    @Autowired
+    private SpreadsheetService spreadsheetService;
 
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
@@ -164,57 +159,9 @@ public class MainController {
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
     public ModelAndView gerFile(@RequestParam("file") MultipartFile file, ModelAndView model) {
         //System.out.println(file);
-        try {
-            //System.out.println(new String(file.getBytes(), "UTF-8"));
-            Workbook workbook;
-            DataFormatter formatter = new DataFormatter();
-            NumberFormat format = NumberFormat.getInstance(Locale.FRANCE);
-            if(file.getOriginalFilename().toLowerCase().endsWith(".xlsx"))
-            {
-                workbook = new XSSFWorkbook(file.getInputStream());
-            }else{
-                workbook = new HSSFWorkbook(file.getInputStream());
-            }
-            Sheet datatypeSheet = workbook.getSheetAt(0);
-            Iterator<Row> iterator = datatypeSheet.iterator();
-            while (iterator.hasNext()) {
-                Row currentRow = iterator.next();
-                Iterator<Cell> cellIterator = currentRow.iterator();
-                byte i = 0;
-                Mark mark = new Mark();
-                while (cellIterator.hasNext()) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-                    Cell currentCell = cellIterator.next();
-                    switch(i++){
-                        case 0:
-                            mark.builder().mark(format.parse(currentCell.toString()).doubleValue());
-                            break;
-                        case 1:
-                            mark.builder().evalDate(Timestamp.valueOf(formatter.formatCellValue(currentCell)));
-                            break;
-                        case 2:
-                            mark.builder().points(format.parse(currentCell.toString()).doubleValue());
-                            break;
-                        case 3:
-                            mark.builder().user(User.builder().login(formatter.formatCellValue(currentCell)).build()).build();
-                            markRepository.save(mark);
-                            break;
-                    }
-                    //System.out.println(i++);
-                    /*if(i++==0){
-                        System.out.println(format.parse(currentCell.toString()).doubleValue());
-                    }else
-                    if (currentCell.getCellType() == CellType.NUMERIC) {
-                        System.out.println(formatter.formatCellValue(currentCell));
-                        //System.out.println((format.parse("4,2")).doubleValue());
-                    }*/
-                }
-            }
-        } catch (ParseException e){
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        spreadsheetService.addMarks(file, auth);
 
         model.setViewName("redirect:fileUpload");
         return model;
