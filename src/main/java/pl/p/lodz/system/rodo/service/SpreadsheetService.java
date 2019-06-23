@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import pl.p.lodz.system.rodo.entity.Mark;
 import pl.p.lodz.system.rodo.entity.User;
 import pl.p.lodz.system.rodo.repo.MarkRepository;
+import pl.p.lodz.system.rodo.repo.UserRepository;
 
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -20,6 +21,9 @@ import java.util.Locale;
 public class SpreadsheetService {
     @Autowired
     private MarkRepository markRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     public void addMarks(MultipartFile file, Authentication auth){
         try {
@@ -55,7 +59,12 @@ public class SpreadsheetService {
                             mark.builder().evalDate(timestamp);
                             break;
                         case 3:
-                            mark.builder().user(User.builder().login(formatter.formatCellValue(currentCell)).build()).build();
+                            User user = User.builder()
+                                    .login(formatter.formatCellValue(currentCell))
+                                    .permission("ROLE_USER")
+                                    .build();
+                            userRepository.save(user);
+                            mark.builder().user(user).build();
                             markRepository.save(mark);
                             break;
                     }
