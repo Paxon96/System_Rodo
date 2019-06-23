@@ -38,8 +38,7 @@
                 <input type="text" class="form-control" placeholder="Hasło" name = "newPassword">
             </div>
 			<div class="form-group">
-                <div class="alert alert-danger" role="alert" th:if="${noIntegerAsDays}">
-                    Podana wartość dni nie jest liczbą
+                <div class="alert alert-danger" role="alert" th:if="${noIntegerAsDays}" th:text="${noIntegerAsDays}">
                 </div>
                 <label>Ilość dni po upływie których usuwane są oceny</label>
                 <input type="text" class="form-control" placeholder="Ilość dni" name = "newDays" th:value="${settings.daysToDelete}">

@@ -33,11 +33,9 @@
 
 
 <div class="container" style="margin-top: 40px">
-    <div class="alert alert-danger" role="alert" th:if="${errorMsg}">
-        Błąd wczytywania pliku
+    <div class="alert alert-danger" role="alert" th:if="${errorMsg}" th:text="${errorMsg}">
     </div>
-	<div class="alert alert-success" role="alert" th:if="${succesMsg}">
-		Plik wczytany pomyślnie
+	<div class="alert alert-success" role="alert" th:if="${succesMsg}" th:text="${succesMsg}">
 	</div>
     <h1 style="margin-bottom: 20px">Wstaw plik</h1>
 <div class="custom-file">

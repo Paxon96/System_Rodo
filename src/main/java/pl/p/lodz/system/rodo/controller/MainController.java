@@ -66,11 +66,19 @@ public class MainController {
     @RequestMapping(value = "/", method = RequestMethod.POST)
     public ModelAndView postMainPage(@ModelAttribute("user") @Valid User user, RedirectAttributes redirect, ModelAndView model) {
 
-        if (!userService.findLoginInDatabase(user.getLogin())) {
+        if(user.getLogin() == null){
+            model.setViewName("redirect:/");
+            redirect.addFlashAttribute("user", user);
+            redirect.addFlashAttribute("invalidPassword", "Niepoprawne hasło");
+            return model;
+        }
+
+        if (!userService.findLoginInDatabase(user.getLogin()) || userRepository.findFirstByLogin(user.getLogin()).getPassword() == null) {
             model.setViewName("redirect:/");
             redirect.addFlashAttribute("user", user);
             //TODO Odkomentować wysyłanie maili. NA razie zablokowane żeby nei spamowało xd. Wysyła na adresy politechniczne
 //            userService.sendEmailToNewUser(user);
+            redirect.addFlashAttribute("noUserInSystem", "Hasło dla tego nr albumu zostało wysłane e-mailem");
             return model;
         }
 
@@ -111,7 +119,6 @@ public class MainController {
 
     @RequestMapping(value = "fileUpload", method = RequestMethod.GET)
     public String getTeacherFileUpload(Model model) {
-        System.out.println(model);
         return "teacherFileUpload";
     }
 
@@ -136,7 +143,7 @@ public class MainController {
         model.setViewName("redirect:/settings");
 
         if (!newDays.isEmpty() && !NumberUtils.isDigits(newDays)) {
-            redirect.addFlashAttribute("noIntegerAsDays", "temp");
+            redirect.addFlashAttribute("noIntegerAsDays", "Podana wartość dni nie jest liczbą");
             return model;
         }
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -157,10 +164,16 @@ public class MainController {
     }
 
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
-    public ModelAndView gerFile(@RequestParam("file") MultipartFile file, ModelAndView model) {
+    public ModelAndView gerFile(@RequestParam("file") MultipartFile file, ModelAndView model, RedirectAttributes redirect) {
 
+        if(!spreadsheetService.isFileFormatValid(file)){
+            redirect.addFlashAttribute("errorMsg", "Błąd wczytywania pliku");
+            model.setViewName("redirect:fileUpload");
+            return model;
+        }
         spreadsheetService.addMarks(file);
 
+        redirect.addFlashAttribute("succesMsg", "Plik wczytany pomyślnie");
         model.setViewName("redirect:fileUpload");
         return model;
     }
