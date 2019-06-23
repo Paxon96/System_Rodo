@@ -72,14 +72,15 @@ public class SpreadsheetService {
                                     .login(formatter.formatCellValue(currentCell))
                                     .permission("ROLE_USER")
                                     .build();
-                            userRepository.save(user);
-                            mark.builder()
+                            if(!userRepository.existsById(user.getId()))
+                                userRepository.save(user);
+                            markRepository.save(Mark.builder()
                                     .activity(activity)
                                     .mark(markValue)
                                     .points(points)
+                                    .evalDate(timestamp)
                                     .user(user)
-                                    .build();
-                            markRepository.save(mark);
+                                    .build());
                             break;
                     }
                 }

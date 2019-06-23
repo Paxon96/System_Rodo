@@ -8,4 +8,6 @@ import pl.p.lodz.system.rodo.entity.User;
 public interface UserRepository extends JpaRepository<User, Long> {
 
     User findFirstByLogin(String login);
+
+    boolean existsByLogin(String login);
 }
