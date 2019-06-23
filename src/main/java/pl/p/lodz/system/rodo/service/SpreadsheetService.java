@@ -28,72 +28,100 @@ public class SpreadsheetService {
     @Autowired
     private UserRepository userRepository;
 
-    public void addMarks(MultipartFile file, Authentication auth){
-        try {
-            //System.out.println(new String(file.getBytes(), "UTF-8"));
-            Workbook workbook;
-            DataFormatter formatter = new DataFormatter();
-            NumberFormat format = NumberFormat.getInstance(Locale.FRANCE);
-            if(file.getOriginalFilename().toLowerCase().endsWith(".xlsx"))
-            {
-                workbook = new XSSFWorkbook(file.getInputStream());
-            }else{
-                workbook = new HSSFWorkbook(file.getInputStream());
-            }
-            Sheet datatypeSheet = workbook.getSheetAt(0);
-            Iterator<Row> iterator = datatypeSheet.iterator();
-            Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-            while (iterator.hasNext()) {
-                Row currentRow = iterator.next();
-                Iterator<Cell> cellIterator = currentRow.iterator();
-                byte i = 0;
-                Mark mark = new Mark();
-                String activity = new String();
-                double points = 0.0;
-                double markValue = 0.0;
-                //Timestamp evalDate;
-                while (cellIterator.hasNext()) {
+    DataFormatter formatter = new DataFormatter();
 
-                    Cell currentCell = cellIterator.next();
-                    switch(i++){
-                        case 0:
-                            //mark.builder().activity(currentCell.getStringCellValue());
-                            activity = currentCell.getStringCellValue();
-                            break;
-                        case 1:
-                            //mark.builder().mark(format.parse(currentCell.toString()).doubleValue());
-                            markValue = format.parse(currentCell.toString()).doubleValue();
-                            break;
-                        case 2:
-                            points = format.parse(currentCell.toString()).doubleValue();
-                            break;
-                        case 3:
-                            User user = User.builder()
-                                    .login(formatter.formatCellValue(currentCell))
-                                    .permission("ROLE_USER")
-                                    .build();
-                            User userToCheck = user;
-                            if(!userRepository.findAll().stream().anyMatch(u -> u.getLogin().equals(userToCheck.getLogin())))
-                                userRepository.save(user);
-                            else
-                                user = userRepository.findFirstByLogin(user.getLogin());
-                            markRepository.save(Mark.builder()
-                                    .activity(activity)
-                                    .mark(markValue)
-                                    .points(points)
-                                    .evalDate(timestamp)
-                                    .user(user)
-                                    .build());
-                            break;
-                    }
+    public void addMarks(MultipartFile file, Authentication auth) {
+        Workbook workbook;
+        if (isFileFormatValid(file)) {
+            workbook = initializeWorkbook(file);
+            processRows(workbook);
+        }
+    }
+
+    private Workbook initializeWorkbook(MultipartFile file)
+    {
+        try {
+            if (file.getOriginalFilename().toLowerCase().endsWith(".xlsx")) {
+                return new XSSFWorkbook(file.getInputStream());
+            } else if (file.getOriginalFilename().toLowerCase().endsWith(".xls")) {
+                return new HSSFWorkbook(file.getInputStream());
+            }
+        }catch(IOException ioe){
+            ioe.printStackTrace();
+        }
+        return null;
+    }
+
+    private boolean isFileFormatValid(MultipartFile file)
+    {
+        return file.getOriginalFilename().toLowerCase().endsWith(".xlsx") || file.getOriginalFilename().toLowerCase().endsWith(".xls");
+    }
+
+    private void processRows(Workbook workbook)
+    {
+        double points;
+        double markValue;
+        String activity;
+        Sheet datatypeSheet = workbook.getSheetAt(0);
+        Iterator<Row> iterator = datatypeSheet.iterator();
+        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+        User user;
+
+        while (iterator.hasNext()) {
+            Row currentRow = iterator.next();
+            Iterator<Cell> cellIterator = currentRow.iterator();
+            byte i = 0;
+            points = 0.0;
+            markValue = 2.0;
+            activity = "";
+            while (cellIterator.hasNext()) {
+                Cell cell = cellIterator.next();
+
+                switch (i++) {
+                    case 0:
+                        if(cell.getCellType() == CellType.STRING)
+                            activity = cell.getStringCellValue();
+                        break;
+                    case 1:
+                        if(cell.getCellType() == CellType.NUMERIC)
+                            markValue = tryParse(cell.toString());
+                        break;
+                    case 2:
+                        if(cell.getCellType() == CellType.NUMERIC)
+                            points = tryParse(cell.toString());
+                        break;
+                    case 3:
+                        user = User.builder()
+                                .login(formatter.formatCellValue(cell))
+                                .permission("ROLE_USER")
+                                .build();
+                        User userToCheck = user;
+                        if (!userRepository.findAll().stream().anyMatch(u -> u.getLogin().equals(userToCheck.getLogin())))
+                            userRepository.save(user);
+                        else
+                            user = userRepository.findFirstByLogin(user.getLogin());
+                        markRepository.save(Mark.builder()
+                                .activity(activity)
+                                .mark(markValue)
+                                .points(points)
+                                .evalDate(timestamp)
+                                .user(user)
+                                .build());
+                        break;
                 }
             }
-        } catch (
-                ParseException e){
-            e.printStackTrace();
-        } catch (
-                IOException e) {
-            e.printStackTrace();
         }
+    }
+
+    private Double tryParse(String number)
+    {
+        NumberFormat format = NumberFormat.getInstance(Locale.FRANCE);
+        try
+        {
+            return format.parse(number).doubleValue();
+        }catch(ParseException pe){
+            pe.printStackTrace();
+        }
+        return 0.0;
     }
 }
