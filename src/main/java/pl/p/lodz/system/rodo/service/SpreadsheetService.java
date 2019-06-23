@@ -5,6 +5,7 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import pl.p.lodz.system.rodo.entity.Mark;
 import pl.p.lodz.system.rodo.entity.User;
@@ -12,12 +13,14 @@ import pl.p.lodz.system.rodo.repo.MarkRepository;
 import pl.p.lodz.system.rodo.repo.UserRepository;
 
 import java.io.IOException;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Iterator;
 import java.util.Locale;
 
+@Service
 public class SpreadsheetService {
     @Autowired
     private MarkRepository markRepository;
@@ -45,18 +48,24 @@ public class SpreadsheetService {
                 Iterator<Cell> cellIterator = currentRow.iterator();
                 byte i = 0;
                 Mark mark = new Mark();
+                String activity = new String();
+                double points = 0.0;
+                double markValue = 0.0;
+                //Timestamp evalDate;
                 while (cellIterator.hasNext()) {
 
                     Cell currentCell = cellIterator.next();
                     switch(i++){
                         case 0:
-                            mark.builder().activity(currentCell.getStringCellValue());
+                            //mark.builder().activity(currentCell.getStringCellValue());
+                            activity = currentCell.getStringCellValue();
                             break;
                         case 1:
-                            mark.builder().mark(format.parse(currentCell.toString()).doubleValue());
+                            //mark.builder().mark(format.parse(currentCell.toString()).doubleValue());
+                            markValue = format.parse(currentCell.toString()).doubleValue();
                             break;
                         case 2:
-                            mark.builder().evalDate(timestamp);
+                            points = format.parse(currentCell.toString()).doubleValue();
                             break;
                         case 3:
                             User user = User.builder()
@@ -64,7 +73,12 @@ public class SpreadsheetService {
                                     .permission("ROLE_USER")
                                     .build();
                             userRepository.save(user);
-                            mark.builder().user(user).build();
+                            mark.builder()
+                                    .activity(activity)
+                                    .mark(markValue)
+                                    .points(points)
+                                    .user(user)
+                                    .build();
                             markRepository.save(mark);
                             break;
                     }
