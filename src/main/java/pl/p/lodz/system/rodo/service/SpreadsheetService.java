@@ -30,7 +30,7 @@ public class SpreadsheetService {
 
     DataFormatter formatter = new DataFormatter();
 
-    public void addMarks(MultipartFile file, Authentication auth) {
+    public void addMarks(MultipartFile file) {
         Workbook workbook;
         if (isFileFormatValid(file)) {
             workbook = initializeWorkbook(file);

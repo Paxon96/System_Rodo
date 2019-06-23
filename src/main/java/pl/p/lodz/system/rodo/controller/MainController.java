@@ -158,10 +158,8 @@ public class MainController {
 
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
     public ModelAndView gerFile(@RequestParam("file") MultipartFile file, ModelAndView model) {
-        //System.out.println(file);
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        spreadsheetService.addMarks(file, auth);
+        spreadsheetService.addMarks(file);
 
         model.setViewName("redirect:fileUpload");
         return model;
