@@ -23,6 +23,9 @@ public class Mark {
     @Column(name = "MarkID")
     private int id;
 
+    @Column(name = "Activity")
+    private String activity;
+
     @Column(name = "Mark")
     private double mark;
 

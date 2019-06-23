@@ -1,6 +1,9 @@
 package pl.p.lodz.system.rodo.controller;
 
 import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -16,11 +19,10 @@ import pl.p.lodz.system.rodo.entity.User;
 import pl.p.lodz.system.rodo.repo.MarkRepository;
 import pl.p.lodz.system.rodo.repo.UserRepository;
 import pl.p.lodz.system.rodo.service.MarkService;
+import pl.p.lodz.system.rodo.service.SpreadsheetService;
 import pl.p.lodz.system.rodo.service.UserService;
 
 import javax.validation.Valid;
-import java.io.IOException;
-import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Map;
 
@@ -35,6 +37,8 @@ public class MainController {
     private UserService userService;
     @Autowired
     private MarkRepository markRepository;
+    @Autowired
+    private SpreadsheetService spreadsheetService;
 
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
@@ -154,12 +158,8 @@ public class MainController {
 
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
     public ModelAndView gerFile(@RequestParam("file") MultipartFile file, ModelAndView model) {
-        System.out.println(file);
-        try {
-            System.out.println(new String(file.getBytes(), "UTF-8"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
+        spreadsheetService.addMarks(file);
 
         model.setViewName("redirect:fileUpload");
         return model;
