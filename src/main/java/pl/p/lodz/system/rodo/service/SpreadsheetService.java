@@ -72,8 +72,11 @@ public class SpreadsheetService {
                                     .login(formatter.formatCellValue(currentCell))
                                     .permission("ROLE_USER")
                                     .build();
-                            if(!userRepository.findAll().stream().anyMatch(u -> u.getLogin().equals(user.getLogin())))
+                            User userToCheck = user;
+                            if(!userRepository.findAll().stream().anyMatch(u -> u.getLogin().equals(userToCheck.getLogin())))
                                 userRepository.save(user);
+                            else
+                                user = userRepository.findFirstByLogin(user.getLogin());
                             markRepository.save(Mark.builder()
                                     .activity(activity)
                                     .mark(markValue)
