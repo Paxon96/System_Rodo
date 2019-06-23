@@ -72,7 +72,7 @@ public class SpreadsheetService {
                                     .login(formatter.formatCellValue(currentCell))
                                     .permission("ROLE_USER")
                                     .build();
-                            if(!userRepository.existsById(user.getId()))
+                            if(!userRepository.findAll().stream().filter(u -> u.getLogin().equals(user.getLogin())).findFirst().isPresent())
                                 userRepository.save(user);
                             markRepository.save(Mark.builder()
                                     .activity(activity)
