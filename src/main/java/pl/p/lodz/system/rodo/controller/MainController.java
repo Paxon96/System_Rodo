@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +24,7 @@ import pl.p.lodz.system.rodo.service.SpreadsheetService;
 import pl.p.lodz.system.rodo.service.UserService;
 
 import javax.validation.Valid;
+import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Map;
 
@@ -51,11 +53,13 @@ public class MainController {
 //                                        .evalDate(new Timestamp(System.currentTimeMillis()))
 //                                        .mark(4)
 //                                        .user(userRepository.findFirstByLogin("t3"))
+//                                        .activity("Test")
 //                                        .build());
 //                markRepository.save(Mark.builder()
 //                                        .points(12)
 //                                        .evalDate(new Timestamp(System.currentTimeMillis()))
 //                                        .mark(5)
+//                                        .activity("Kolokwium")
 //                                        .user(userRepository.findFirstByLogin("t3"))
 //                                        .build());
         //        Settings settings = Settings.builder().daysToDelete((short) 5).user(userRepository.findFirstByLogin("t2")).build();
