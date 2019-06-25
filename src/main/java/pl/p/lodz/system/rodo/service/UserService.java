@@ -38,7 +38,13 @@ public class UserService {
     public void sendEmailToNewUser(User user) {
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         String random = RandomStringUtils.random(8, true, true);
-        userRepository.save(User.builder().login(user.getLogin()).password(passwordEncoder.encode(random)).permission("ROLE_USER").build());
+        if(!findLoginInDatabase(user.getLogin()))
+            userRepository.save(User.builder().login(user.getLogin()).password(passwordEncoder.encode(random)).permission("ROLE_USER").build());
+        else{
+            User user1 = userRepository.findFirstByLogin(user.getLogin());
+            user1.setPassword(passwordEncoder.encode(random));
+            userRepository.save(user1);
+        }
         emailService.sendEmail(user.getLogin(), random);
     }
 }

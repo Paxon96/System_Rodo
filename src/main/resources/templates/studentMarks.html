@@ -45,7 +45,7 @@
             <tbody>
             <tr th:each="mark, rowStat: ${marks}"
                 th:style="${rowStat.odd} ? 'color: black' : 'color: black;'">
-                <td th:text="${mark.id}"></td>
+                <td th:text="${mark.activity}"></td>
                 <td th:text="${mark.mark}"></td>
                 <td th:text="${mark.points}"></td>
 				<td th:text="${mark.evalDate}"></td>

@@ -22,43 +22,37 @@ import java.util.Locale;
 
 @Service
 public class SpreadsheetService {
-    @Autowired
-    private MarkRepository markRepository;
 
-    @Autowired
-    private UserRepository userRepository;
+    @Autowired private MarkRepository markRepository;
+
+    @Autowired private UserRepository userRepository;
 
     DataFormatter formatter = new DataFormatter();
 
     public void addMarks(MultipartFile file) {
         Workbook workbook;
-        if (isFileFormatValid(file)) {
-            workbook = initializeWorkbook(file);
-            processRows(workbook);
-        }
+        workbook = initializeWorkbook(file);
+        processRows(workbook);
     }
 
-    private Workbook initializeWorkbook(MultipartFile file)
-    {
+    private Workbook initializeWorkbook(MultipartFile file) {
         try {
             if (file.getOriginalFilename().toLowerCase().endsWith(".xlsx")) {
                 return new XSSFWorkbook(file.getInputStream());
             } else if (file.getOriginalFilename().toLowerCase().endsWith(".xls")) {
                 return new HSSFWorkbook(file.getInputStream());
             }
-        }catch(IOException ioe){
+        } catch (IOException ioe) {
             ioe.printStackTrace();
         }
         return null;
     }
 
-    private boolean isFileFormatValid(MultipartFile file)
-    {
+    public boolean isFileFormatValid(MultipartFile file) {
         return file.getOriginalFilename().toLowerCase().endsWith(".xlsx") || file.getOriginalFilename().toLowerCase().endsWith(".xls");
     }
 
-    private void processRows(Workbook workbook)
-    {
+    private void processRows(Workbook workbook) {
         double points;
         double markValue;
         String activity;
@@ -79,47 +73,37 @@ public class SpreadsheetService {
 
                 switch (i++) {
                     case 0:
-                        if(cell.getCellType() == CellType.STRING)
+                        if (cell.getCellType() == CellType.STRING)
                             activity = cell.getStringCellValue();
                         break;
                     case 1:
-                        if(cell.getCellType() == CellType.NUMERIC)
+                        if (cell.getCellType() == CellType.NUMERIC)
                             markValue = tryParse(cell.toString());
                         break;
                     case 2:
-                        if(cell.getCellType() == CellType.NUMERIC)
+                        if (cell.getCellType() == CellType.NUMERIC)
                             points = tryParse(cell.toString());
                         break;
                     case 3:
-                        user = User.builder()
-                                .login(formatter.formatCellValue(cell))
-                                .permission("ROLE_USER")
-                                .build();
+                        user = User.builder().login(formatter.formatCellValue(cell)).permission("ROLE_USER").build();
                         User userToCheck = user;
                         if (!userRepository.findAll().stream().anyMatch(u -> u.getLogin().equals(userToCheck.getLogin())))
                             userRepository.save(user);
                         else
                             user = userRepository.findFirstByLogin(user.getLogin());
-                        markRepository.save(Mark.builder()
-                                .activity(activity)
-                                .mark(markValue)
-                                .points(points)
-                                .evalDate(timestamp)
-                                .user(user)
-                                .build());
+                        markRepository.save(
+                                Mark.builder().activity(activity).mark(markValue).points(points).evalDate(timestamp).user(user).build());
                         break;
                 }
             }
         }
     }
 
-    private Double tryParse(String number)
-    {
+    private Double tryParse(String number) {
         NumberFormat format = NumberFormat.getInstance(Locale.FRANCE);
-        try
-        {
+        try {
             return format.parse(number).doubleValue();
-        }catch(ParseException pe){
+        } catch (ParseException pe) {
             pe.printStackTrace();
         }
         return 0.0;

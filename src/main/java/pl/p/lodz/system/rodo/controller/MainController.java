@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +24,7 @@ import pl.p.lodz.system.rodo.service.SpreadsheetService;
 import pl.p.lodz.system.rodo.service.UserService;
 
 import javax.validation.Valid;
+import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Map;
 
@@ -36,41 +38,31 @@ public class MainController {
     @Autowired
     private UserService userService;
     @Autowired
-    private MarkRepository markRepository;
-    @Autowired
     private SpreadsheetService spreadsheetService;
 
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String getMainPage(Model model) {
         model.addAttribute("user", new User());
-        //        userRepository.save(User.builder().login("t2").password(passwordEncoder.encode("t2")).permission("ROLE_USER").build());
-        //
-//                markRepository.save(Mark.builder()
-//                                        .points(12.5)
-//                                        .evalDate(new Timestamp(System.currentTimeMillis()))
-//                                        .mark(4)
-//                                        .user(userRepository.findFirstByLogin("t3"))
-//                                        .build());
-//                markRepository.save(Mark.builder()
-//                                        .points(12)
-//                                        .evalDate(new Timestamp(System.currentTimeMillis()))
-//                                        .mark(5)
-//                                        .user(userRepository.findFirstByLogin("t3"))
-//                                        .build());
-        //        Settings settings = Settings.builder().daysToDelete((short) 5).user(userRepository.findFirstByLogin("t2")).build();
-        //        settingsRepository.save(settings);
         return "index";
     }
 
     @RequestMapping(value = "/", method = RequestMethod.POST)
     public ModelAndView postMainPage(@ModelAttribute("user") @Valid User user, RedirectAttributes redirect, ModelAndView model) {
 
-        if (!userService.findLoginInDatabase(user.getLogin())) {
+        if(user.getLogin() == null){
             model.setViewName("redirect:/");
             redirect.addFlashAttribute("user", user);
-            //TODO Odkomentować wysyłanie maili. NA razie zablokowane żeby nei spamowało xd. Wysyła na adresy politechniczne
-//            userService.sendEmailToNewUser(user);
+            redirect.addFlashAttribute("invalidPassword", "Niepoprawne hasło");
+            return model;
+        }
+
+        if (!userService.findLoginInDatabase(user.getLogin()) || userRepository.findFirstByLogin(user.getLogin()).getPassword() == null) {
+            model.setViewName("redirect:/");
+            redirect.addFlashAttribute("user", user);
+            //TODO Odkomentować wysyłanie maili. Wysyła na adresy politechniczne
+            //userService.sendEmailToNewUser(user);
+            redirect.addFlashAttribute("noUserInSystem", "Hasło dla tego nr albumu zostało wysłane e-mailem");
             return model;
         }
 
@@ -111,7 +103,6 @@ public class MainController {
 
     @RequestMapping(value = "fileUpload", method = RequestMethod.GET)
     public String getTeacherFileUpload(Model model) {
-        System.out.println(model);
         return "teacherFileUpload";
     }
 
@@ -136,7 +127,7 @@ public class MainController {
         model.setViewName("redirect:/settings");
 
         if (!newDays.isEmpty() && !NumberUtils.isDigits(newDays)) {
-            redirect.addFlashAttribute("noIntegerAsDays", "temp");
+            redirect.addFlashAttribute("noIntegerAsDays", "Podana wartość dni nie jest liczbą");
             return model;
         }
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -157,10 +148,16 @@ public class MainController {
     }
 
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
-    public ModelAndView gerFile(@RequestParam("file") MultipartFile file, ModelAndView model) {
+    public ModelAndView gerFile(@RequestParam("file") MultipartFile file, ModelAndView model, RedirectAttributes redirect) {
 
+        if(!spreadsheetService.isFileFormatValid(file)){
+            redirect.addFlashAttribute("errorMsg", "Błąd wczytywania pliku");
+            model.setViewName("redirect:fileUpload");
+            return model;
+        }
         spreadsheetService.addMarks(file);
 
+        redirect.addFlashAttribute("succesMsg", "Plik wczytany pomyślnie");
         model.setViewName("redirect:fileUpload");
         return model;
     }

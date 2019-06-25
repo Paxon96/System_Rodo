@@ -20,8 +20,9 @@
     </button>
 </nav>
 <div class="container" style="margin-top: 40px">
-    <div class="alert alert-danger" role="alert" th:if="${noUserInSystem}">
-        Brak użytkownika w systemie.
+    <div class="alert alert-danger" role="alert" th:if="${noUserInSystem}" th:text="${noUserInSystem}">
+    </div>
+    <div class="alert alert-danger" role="alert" th:if="${invalidPassword}" th:text="${invalidPassword}">
     </div>
     <h1 style="margin-bottom: 20px">Podaj numer indeksu lub identyfikator</h1>
     <form th:action="@{/}" th:object="${user}" method="post">
