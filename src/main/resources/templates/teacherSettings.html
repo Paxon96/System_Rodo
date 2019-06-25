@@ -35,7 +35,7 @@
         <form th:action="@{settings/teacher}" th:method="post">
             <div class="form-group">
                 <label>Hasło</label>
-                <input type="text" class="form-control" placeholder="Hasło" name = "newPassword">
+                <input type="password" class="form-control" placeholder="Hasło" name = "newPassword">
             </div>
 			<div class="form-group">
                 <div class="alert alert-danger" role="alert" th:if="${noIntegerAsDays}" th:text="${noIntegerAsDays}">

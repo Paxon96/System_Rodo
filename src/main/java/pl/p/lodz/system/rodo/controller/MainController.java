@@ -38,32 +38,12 @@ public class MainController {
     @Autowired
     private UserService userService;
     @Autowired
-    private MarkRepository markRepository;
-    @Autowired
     private SpreadsheetService spreadsheetService;
 
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String getMainPage(Model model) {
         model.addAttribute("user", new User());
-        //        userRepository.save(User.builder().login("t2").password(passwordEncoder.encode("t2")).permission("ROLE_USER").build());
-        //
-//                markRepository.save(Mark.builder()
-//                                        .points(12.5)
-//                                        .evalDate(new Timestamp(System.currentTimeMillis()))
-//                                        .mark(4)
-//                                        .user(userRepository.findFirstByLogin("t3"))
-//                                        .activity("Test")
-//                                        .build());
-//                markRepository.save(Mark.builder()
-//                                        .points(12)
-//                                        .evalDate(new Timestamp(System.currentTimeMillis()))
-//                                        .mark(5)
-//                                        .activity("Kolokwium")
-//                                        .user(userRepository.findFirstByLogin("t3"))
-//                                        .build());
-        //        Settings settings = Settings.builder().daysToDelete((short) 5).user(userRepository.findFirstByLogin("t2")).build();
-        //        settingsRepository.save(settings);
         return "index";
     }
 
@@ -80,8 +60,8 @@ public class MainController {
         if (!userService.findLoginInDatabase(user.getLogin()) || userRepository.findFirstByLogin(user.getLogin()).getPassword() == null) {
             model.setViewName("redirect:/");
             redirect.addFlashAttribute("user", user);
-            //TODO Odkomentować wysyłanie maili. NA razie zablokowane żeby nei spamowało xd. Wysyła na adresy politechniczne
-//            userService.sendEmailToNewUser(user);
+            //TODO Odkomentować wysyłanie maili. Wysyła na adresy politechniczne
+            //userService.sendEmailToNewUser(user);
             redirect.addFlashAttribute("noUserInSystem", "Hasło dla tego nr albumu zostało wysłane e-mailem");
             return model;
         }
